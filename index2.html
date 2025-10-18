@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Galería Pokémon</title>
+<link rel="stylesheet" href="estilos2.css">
+</head>
+<body>
+<h1>Galería Pokémon</h1>
+<p>Nombre: Ariel David Limachi Marca - C.I.:9924624</p>
+
+<input type="text" id="filtro" placeholder="Filtrar por nombre">
+<button onclick="buscar()">Buscar</button>
+
+<div id="galeria" class="galeria"></div>
+
+<button onclick="prev()">⬅️ Anterior</button>
+<button onclick="next()">Siguiente ➡️</button>
+
+<script>
+let pagina = 0;
+
+function cargar() {
+  fetch(`https://pokeapi.co/api/v2/pokemon?limit=20&offset=${pagina*20}`)
+    .then(res => res.json())
+    .then(data => {
+      console.log("Pokémons:", data.results);
+      const gal = document.getElementById('galeria');
+      gal.innerHTML = '';
+      data.results.forEach(p => {
+        fetch(p.url)
+          .then(r => r.json())
+          .then(info => {
+            gal.innerHTML += `<div class="pokemon"><img src="${info.sprites.front_default}" alt="${info.name}"><p>${info.name}</p></div>`;
+          });
+      });
+    });
+}
+
+function next(){ pagina++; cargar(); }
+function prev(){ if(pagina>0) pagina--; cargar(); }
+
+function buscar() {
+  const nombre = document.getElementById('filtro').value.trim().toLowerCase();
+  const gal = document.getElementById('galeria');
+  gal.innerHTML = '';
+  if (!nombre) return cargar();
+
+  fetch(`https://pokeapi.co/api/v2/pokemon/${nombre}`)
+    .then(res => res.json())
+    .then(info => {
+      console.log("Pokémon encontrado:", info);
+      gal.innerHTML = `<div class="pokemon"><img src="${info.sprites.front_default}" alt="${info.name}"><p>${info.name}</p></div>`;
+    })
+    .catch(() => alert("Pokémon no encontrado"));
+}
+
+cargar();
+</script>
+</body>
+</html>
